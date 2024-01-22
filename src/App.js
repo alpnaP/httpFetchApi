@@ -1,23 +1,61 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import "./App.css";
+import User from "./components/User";
+import Todo from "./components/Todo";
+import Error from "./components/Error";
 
 function App() {
+  const [users, setUsers] = useState([]);
+  const [todos, setTodo] = useState([]);
+  const [userData, setUserData] = useState(true);
+  const [errorFlag, setErrorFlag] = useState(false);
+  const fetchUsers = () => {
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Error!!!!");
+        }
+      })
+      .then((json) => {
+        setUsers(json);
+      })
+      .catch((error) => {
+        setErrorFlag(true);
+      });
+    setUserData(true);
+  };
+  const fetchTodos = () => {
+    fetch("https://jsonplaceholder.typicode.com/todos")
+      .then((response) => response.json())
+      .then((json) => {
+        setTodo(json);
+      })
+      .catch((error) => {
+        setErrorFlag(true);
+      });
+    setUserData(false);
+  };
+
+  if (errorFlag) {
+    <Error />;
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="topbar">
+        <button onClick={fetchUsers}>Users</button>
+        <button onClick={fetchTodos}>Todos</button>
+        <br />
+
+        {userData
+          ? users.map((user, index) => {
+              return <User user={user} />;
+            })
+          : todos.map((todo, index) => {
+              return <Todo todo={todo} />;
+            })}
+      </div>
     </div>
   );
 }
